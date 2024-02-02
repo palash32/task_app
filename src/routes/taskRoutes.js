@@ -114,7 +114,7 @@ router.get('/get-tasks',authenticateToken, async (req, res) => {
     const token = authHeader && authHeader.split(' ')[1];
   
     if (!token) {
-      return res.sendStatus(401); // Unauthorized
+      return res.sendStatus(401);
     }
   
     jwt.verify(token)
@@ -124,7 +124,7 @@ router.get('/get-tasks',authenticateToken, async (req, res) => {
       })
       .catch(err => {
         console.error(err);
-        res.sendStatus(403); // Forbidden
+        res.sendStatus(403); 
       });
   }
 

@@ -4,7 +4,7 @@ const jwt = require('../utils/jwt');
 require("dotenv").config();
 const SubTask = require('../models/subtask');
 
-router.post('/create-sub-task/:task_id', async (req, res) => {
+router.post('/create-sub-task/:task_id',authenticateToken, async (req, res) => {
     const { task_id } = req.params;
     const { status } = req.body;
     const token = req.header('Authorization');
@@ -29,7 +29,7 @@ router.post('/create-sub-task/:task_id', async (req, res) => {
     }
   });
 
-  router.get('/get-sub-tasks/:task_id?', async (req, res) => {
+  router.get('/get-sub-tasks/:task_id?',authenticateToken, async (req, res) => {
     const { task_id } = req.params;
     const token = req.header('Authorization');
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -48,7 +48,7 @@ router.post('/create-sub-task/:task_id', async (req, res) => {
     }
   });
 
-  router.put('/update-sub-task/:sub_task_id', async (req, res) => {
+  router.put('/update-sub-task/:sub_task_id',authenticateToken, async (req, res) => {
     const { sub_task_id } = req.params;
     const { status } = req.body;
     const token = req.header('Authorization');
@@ -76,7 +76,7 @@ router.post('/create-sub-task/:task_id', async (req, res) => {
     }
   });
 
-  router.delete('/delete-sub-task/:sub_task_id', async (req, res) => {
+  router.delete('/delete-sub-task/:sub_task_id',authenticateToken, async (req, res) => {
     const { sub_task_id } = req.params;
     const token = req.header('Authorization');
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -98,5 +98,23 @@ router.post('/create-sub-task/:task_id', async (req, res) => {
       res.status(400).json({ message: 'Error deleting sub task' });
     }
   });
+  function authenticateToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+  
+    if (!token) {
+      return res.sendStatus(401); 
+    }
+  
+    jwt.verify(token)
+      .then(decoded => {
+        req.userId = decoded.userId;
+        next();
+      })
+      .catch(err => {
+        console.error(err);
+        res.sendStatus(403); 
+      });
+  }
 
   module.exports = router;
